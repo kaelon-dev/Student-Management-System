@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student Management</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#F4F5F8; --surface:#FBFBFD; --ink:#1A2233; --muted:#5E6A7F; --line:#E0E4EC;
+  --accent:#4F46E5; --accent-ink:#FFFFFF; --danger:#B42318; --bar:#DDE0F5;
+  --glass:rgba(255,255,255,.62); --glass-line:rgba(110,120,170,.22); --shadow:0 8px 30px rgba(40,50,90,.10);
+  --stripe:rgba(79,70,229,.045); --hover:rgba(79,70,229,.10); --blob1:rgba(99,102,241,.22); --blob2:rgba(16,185,129,.14);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141A24; --surface:#1C2431; --ink:#E8ECF4; --muted:#97A3B8; --line:#2C3748;
+    --accent:#818CF8; --accent-ink:#0C1022; --danger:#FF8A80; --bar:#2F3A55;
+    --glass:rgba(34,44,61,.55); --glass-line:rgba(160,175,210,.16); --shadow:0 10px 34px rgba(0,0,0,.38);
+    --stripe:rgba(255,255,255,.028); --hover:rgba(129,140,248,.14); --blob1:rgba(99,102,241,.22); --blob2:rgba(16,185,129,.10);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141A24; --surface:#1C2431; --ink:#E8ECF4; --muted:#97A3B8; --line:#2C3748;
+  --accent:#818CF8; --accent-ink:#0C1022; --danger:#FF8A80; --bar:#2F3A55;
+  --glass:rgba(34,44,61,.55); --glass-line:rgba(160,175,210,.16); --shadow:0 10px 34px rgba(0,0,0,.38);
+  --stripe:rgba(255,255,255,.028); --hover:rgba(129,140,248,.14); --blob1:rgba(99,102,241,.22); --blob2:rgba(16,185,129,.10);
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(520px 380px at 12% 6%,var(--blob1),transparent 70%),radial-gradient(480px 360px at 90% 24%,var(--blob2),transparent 70%)}
+.wrap{max-width:980px;margin:0 auto;padding:28px 20px 48px}
+header,.stat,.table-box,.toolbar input{background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%)}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 22px;border-radius:18px}
+h1{margin:0;font-size:1.75rem;font-weight:700;letter-spacing:-.01em}
+.sub{margin:2px 0 0;color:var(--muted)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{border:1px solid var(--glass-line);background:var(--glass);padding:8px 16px;border-radius:10px;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:500;box-shadow:0 4px 14px rgba(79,70,229,.35)}
+.btn.danger{color:var(--danger)}
+.btn.small{padding:4px 10px;font-size:.9rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:22px 0 22px}
+.stat{border-radius:18px;padding:18px 22px}
+.stat b{display:block;font-size:2.8rem;line-height:1.1;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin-bottom:2px}
+.stat span{color:var(--muted);font-size:.92rem}
+.toolbar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.toolbar input{flex:1 1 220px;padding:9px 14px;border-radius:10px;box-shadow:none}
+.table-box{border-radius:18px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:680px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-weight:500;color:var(--muted);font-size:.88rem}
+tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even){background:var(--stripe)}
+tbody td{transition:background .18s ease,box-shadow .18s ease}
+tbody tr:hover td{background:var(--hover)}
+tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+td.actions{white-space:nowrap;text-align:right}
+td.actions .btn+.btn{margin-left:6px}
+.gpa{display:flex;align-items:center;gap:8px;min-width:96px}
+.gpa i{display:block;height:6px;border-radius:3px;background:var(--bar);flex:1;position:relative;overflow:hidden}
+.gpa i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--accent)}
+.empty{padding:36px 16px;text-align:center;color:var(--muted)}
+#status{min-height:1.4em;margin:10px 2px 0;color:var(--muted);font-size:.92rem}
+dialog{border:1px solid var(--glass-line);border-radius:18px;background:var(--surface);color:var(--ink);padding:24px;width:min(440px,92vw);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(8,14,22,.45);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+dialog h2{margin:0 0 14px;font-size:1.2rem}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:.9rem;margin-bottom:3px;font-weight:500}
+.field input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.field input[readonly]{opacity:.65}
+.field .err{display:block;color:var(--danger);font-size:.85rem;min-height:0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.buttons{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+@media (max-width:560px){.stats{grid-template-columns:1fr}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Student Management</h1>
+      <p class="sub">Add, find, update and remove student records.</p>
+    </div>
+    <button class="btn" id="theme" aria-pressed="false"></button>
+  </header>
+
+  <section class="stats" aria-label="Summary">
+    <div class="stat"><b id="s-total">0</b><span>Students</span></div>
+    <div class="stat"><b id="s-avg">–</b><span>Average GPA</span></div>
+    <div class="stat"><b id="s-top">–</b><span id="s-top-l">Highest GPA</span></div>
+  </section>
+
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="Search by ID or name" aria-label="Search by ID or name">
+    <button class="btn primary" id="add">Add student</button>
+  </div>
+
+  <div class="table-box">
+    <table>
+      <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>GPA</th><th>Major</th><th>Email</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="empty" hidden></div>
+  </div>
+  <p id="status" role="status" aria-live="polite"></p>
+</div>
+
+<dialog id="dlg">
+  <form id="form" novalidate>
+    <h2 id="dlg-title">Add student</h2>
+    <div class="field"><label for="f-id">Student ID</label><input id="f-id" inputmode="numeric" autocomplete="off"><span class="err" data-for="id"></span></div>
+    <div class="field"><label for="f-name">Name</label><input id="f-name" autocomplete="off"><span class="err" data-for="name"></span></div>
+    <div class="row">
+      <div class="field"><label for="f-age">Age (6–18)</label><input id="f-age" type="number" step="1"><span class="err" data-for="age"></span></div>
+      <div class="field"><label for="f-gpa">GPA (0.0–4.0)</label><input id="f-gpa" type="number" step="0.01"><span class="err" data-for="gpa"></span></div>
+    </div>
+    <div class="field"><label for="f-major">Major</label><input id="f-major" autocomplete="off"></div>
+    <div class="field"><label for="f-email">Email</label><input id="f-email" autocomplete="off"></div>
+    <div class="buttons">
+      <button type="button" class="btn" id="cancel">Cancel</button>
+      <button type="submit" class="btn primary" id="save">Save student</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="del">
+  <h2>Delete student?</h2>
+  <p id="del-text"></p>
+  <div class="buttons">
+    <button class="btn" id="del-no">Cancel</button>
+    <button class="btn danger" id="del-yes">Delete student</button>
+  </div>
+</dialog>
+
+<script>
+(function(){
+  var KEY = 'sms.students', TKEY = 'sms.theme';
+  var $ = function(id){ return document.getElementById(id); };
+  var seed = [
+    {id:101, name:'Aarav Menon', age:14, gpa:3.8, major:'Science', email:'aarav@example.com'},
+    {id:102, name:'Diya Raman', age:12, gpa:3.2, major:'Arts', email:'diya@example.com'},
+    {id:103, name:'Kabir Nair', age:16, gpa:2.9, major:'Commerce', email:'kabir@example.com'}
+  ];
+  var students = load() || seed;
+  var editingId = null, deletingId = null;
+
+  function load(){ try { var v = localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch(e){ return null; } }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(students)); } catch(e){} }
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function say(msg){ $('status').textContent = msg; }
+
+  /* ---------- theme ---------- */
+  function applyTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    $('theme').textContent = t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    $('theme').setAttribute('aria-pressed', t === 'dark');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(TKEY); } catch(e){}
+  applyTheme(saved || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  $('theme').addEventListener('click', function(){
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem(TKEY, next); } catch(e){}
+  });
+
+  /* ---------- render ---------- */
+  function render(){
+    var q = $('q').value.trim().toLowerCase();
+    var list = students.filter(function(s){
+      return !q || String(s.id) === q || s.name.toLowerCase().indexOf(q) !== -1;
+    });
+    $('rows').innerHTML = list.map(function(s){
+      return '<tr><td>' + s.id + '</td><td>' + esc(s.name) + '</td><td>' + s.age + '</td>' +
+        '<td><div class="gpa"><span>' + s.gpa.toFixed(2) + '</span><i style="--w:' + (s.gpa / 4 * 100) + '%"></i></div></td>' +
+        '<td>' + esc(s.major) + '</td><td>' + esc(s.email) + '</td>' +
+        '<td class="actions"><button class="btn small" data-edit="' + s.id + '">Edit</button>' +
+        '<button class="btn small danger" data-del="' + s.id + '">Delete</button></td></tr>';
+    }).join('');
+    var empty = $('empty');
+    empty.hidden = list.length > 0;
+    if (!list.length) empty.textContent = students.length ? 'No student matches “' + $('q').value.trim() + '”.' : 'No students yet. Select “Add student” to create the first record.';
+    $('s-total').textContent = students.length;
+    if (students.length) {
+      var sum = 0, top = students[0];
+      students.forEach(function(s){ sum += s.gpa; if (s.gpa > top.gpa) top = s; });
+      $('s-avg').textContent = (sum / students.length).toFixed(2);
+      $('s-top').textContent = top.gpa.toFixed(2);
+      $('s-top-l').textContent = 'Highest GPA (' + top.name + ')';
+    } else {
+      $('s-avg').textContent = '–'; $('s-top').textContent = '–'; $('s-top-l').textContent = 'Highest GPA';
+    }
+  }
+
+  /* ---------- add / edit ---------- */
+  function openForm(student){
+    editingId = student ? student.id : null;
+    $('dlg-title').textContent = student ? 'Update student' : 'Add student';
+    $('f-id').value = student ? student.id : '';
+    $('f-id').readOnly = !!student;
+    $('f-name').value = student ? student.name : '';
+    $('f-age').value = student ? student.age : '';
+    $('f-gpa').value = student ? student.gpa : '';
+    $('f-major').value = student ? student.major : '';
+    $('f-email').value = student ? student.email : '';
+    document.querySelectorAll('.err').forEach(function(e){ e.textContent = ''; });
+    $('dlg').showModal();
+    (student ? $('f-name') : $('f-id')).focus();
+  }
+
+  function validate(v){
+    var e = {};
+    if (!/^\d+$/.test(v.idRaw)) e.id = 'ID must be a whole number.';
+    else if (editingId === null && students.some(function(s){ return s.id === Number(v.idRaw); })) e.id = 'A student with this ID already exists.';
+    if (!v.name) e.name = 'Enter the student’s name.';
+    var age = Number(v.ageRaw);
+    if (v.ageRaw === '' || !Number.isInteger(age) || age < 6 || age > 18) e.age = 'Age must be a whole number from 6 to 18.';
+    var gpa = Number(v.gpaRaw);
+    if (v.gpaRaw === '' || !Number.isFinite(gpa) || gpa < 0 || gpa > 4) e.gpa = 'GPA must be a number from 0.0 to 4.0.';
+    return e;
+  }
+
+  $('form').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var v = {
+      idRaw: $('f-id').value.trim(), name: $('f-name').value.trim(),
+      ageRaw: $('f-age').value.trim(), gpaRaw: $('f-gpa').value.trim()
+    };
+    var errs = validate(v);
+    document.querySelectorAll('.err').forEach(function(el){ el.textContent = errs[el.dataset.for] || ''; });
+    if (Object.keys(errs).length) return;
+    var rec = {
+      id: Number(v.idRaw), name: v.name, age: Number(v.ageRaw), gpa: Number(v.gpaRaw),
+      major: $('f-major').value.trim(), email: $('f-email').value.trim()
+    };
+    if (editingId === null) { students.push(rec); say('Student added.'); }
+    else {
+      students = students.map(function(s){ return s.id === editingId ? rec : s; });
+      say('Student updated.');
+    }
+    save(); render(); $('dlg').close();
+  });
+  $('cancel').addEventListener('click', function(){ $('dlg').close(); });
+  $('add').addEventListener('click', function(){ openForm(null); });
+
+  /* ---------- table actions ---------- */
+  $('rows').addEventListener('click', function(ev){
+    var b = ev.target.closest('button');
+    if (!b) return;
+    if (b.dataset.edit) {
+      openForm(students.filter(function(s){ return s.id === Number(b.dataset.edit); })[0]);
+    } else if (b.dataset.del) {
+      deletingId = Number(b.dataset.del);
+      var s = students.filter(function(x){ return x.id === deletingId; })[0];
+      $('del-text').textContent = s.name + ' (ID ' + s.id + ') will be removed from the list.';
+      $('del').showModal();
+    }
+  });
+  $('del-no').addEventListener('click', function(){ $('del').close(); });
+  $('del-yes').addEventListener('click', function(){
+    students = students.filter(function(s){ return s.id !== deletingId; });
+    save(); render(); $('del').close(); say('Student deleted.');
+  });
+
+  $('q').addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>
